@@ -37,7 +37,6 @@ feature_map = {
 choice = st.sidebar.selectbox("Choose a feature to explore:", list(feature_map.keys()))
 feature = feature_map[choice]
 
-# Check if selected feature exists in dataframe
 if feature not in df.columns:
     st.error(f"Feature '{feature}' not found in data columns: {df.columns.tolist()}")
 else:
@@ -53,3 +52,38 @@ else:
                   markers=True, template="plotly_dark")
 
     st.plotly_chart(fig)
+
+    # === Add this block below ===
+
+    # Let user select year for top artists/songs
+    years = df['year'].sort_values().unique()
+    selected_year = st.sidebar.selectbox("Select year for top artists/songs:", years)
+
+    # Filter data by selected year
+    df_year = df[df['year'] == selected_year]
+
+    st.header(f"Top Spotify Trends for {selected_year}")
+
+    # Top Artists
+    if 'artist' in df_year.columns:
+        top_artists = df_year['artist'].value_counts().head(10)
+        st.subheader("Top 10 Artists")
+        for artist, count in top_artists.items():
+            st.write(f"{artist} — {count} songs")
+
+    # Top Genres (if available)
+    if 'genre' in df_year.columns:
+        top_genres = df_year['genre'].value_counts().head(10)
+        st.subheader("Top 10 Genres")
+        for genre, count in top_genres.items():
+            st.write(f"{genre} — {count} songs")
+    else:
+        st.info("Genre data not available in dataset.")
+
+    # Top Songs
+    if 'track_name' in df_year.columns:
+        top_songs = df_year['track_name'].value_counts().head(10)
+        st.subheader("Top 10 Songs")
+        for song, count in top_songs.items():
+            st.write(f"{song} — {count} occurrences")
+
